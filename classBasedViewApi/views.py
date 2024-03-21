@@ -3,28 +3,29 @@ from .serializers import PersonSerialize
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.http import Http404
 
 
 class PersonView(APIView):
     def get(self, request):
         people = Person.objects.all() 
-        serialize = PersonSerialize(people, many=True)
-        return Response(serialize.data)
+        serializer = PersonSerialize(people, many=True)
+        return Response(serializer.data)
     def post(self, request):
-        serialize = PersonSerialize(data=request.data)
-        if serialize.is_valid():
-            serialize.save()
-            return Response(serialize.data, status=status.HTTP_201_CREATED)
+        serializer = PersonSerialize(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response({'error': 'Doen'})
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PersonDetail(APIView):
     def get_by_pk(self, id):
         try:
             return Person.objects.get(pk=id)
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        except Person.DoesNotExist:
+            raise Http404
     
     def get(self, request, id):
         person = self.get_by_pk(id)
@@ -38,18 +39,18 @@ class PersonDetail(APIView):
     
     def post(self, request, id):
         person = self.get_by_pk(id)
-        serialize = PersonSerialize(person, data=request.data)
-        if serialize.is_valid():
-            serialize.save()
-            return Response(serialize.data)
+        serializer = PersonSerialize(person, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
         else:
-            return Response(serialize.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
     def pust(self, request, id):
         person = self.get_by_pk(id)
-        serialize = PersonSerialize(person, data=request.data)
-        if serialize.is_valid():
-            serialize.save()
-            return Response(serialize.data)
+        serializer = PersonSerialize(person, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
         else:
-            return Response(serialize.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
